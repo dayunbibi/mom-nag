@@ -97,7 +97,7 @@ export async function makeResultImage(nag: Nag, mom: MomKey, photoUrl: string): 
   const isTop = stageIndex(nag.smash) === STAGES.length - 1;
   const footUrl = location.host + (nag.mock ? " · 연습 모드" : "");
   await loadFontsFor(
-    ["AI 엄마 잔소리", m.name, "방 별명", nag.title, ...nag.nags, nag.praise, "그래도…", "등짝 스매싱 지수", stage.name, "우리 엄마는 몇 점 줄까?", "손바닥 자국", footUrl, "/1000123456789"].join(""),
+    ["AI 엄마 잔소리", m.name, "방 별명", nag.title, ...nag.nags, nag.praise, "그래도…", "등짝 스매싱 지수", stage.name, "우리 엄마는 몇 점 줄까?", footUrl, "/1000123456789"].join(""),
   );
   const photo = await loadImage(photoUrl);
 
@@ -148,28 +148,13 @@ export async function makeResultImage(nag: Nag, mom: MomKey, photoUrl: string): 
   c.drawImage(photo, (photo.width - sw) / 2, (photo.height - sh) / 2, sw, sh, -iw / 2, -ih / 2, iw, ih);
   c.restore();
 
-  // 손바닥 자국 spot for the top stage (placeholder until there's an illustration)
+  // 손바닥 자국 for the top stage, slapped over the photo's corner
   if (isTop) {
+    const palm = await loadImage("/illustrations/palm-mark.svg");
     c.save();
     c.translate(W - PAD_X - 20 - 150, photoTop - 10 + 180);
     c.rotate((-14 * Math.PI) / 180);
-    c.beginPath();
-    c.roundRect(-150, -180, 300, 360, [138, 138, 120, 120]);
-    c.fillStyle = "rgba(215,38,30,.16)";
-    c.fill();
-    c.setLineDash([24, 16]);
-    c.lineWidth = 8;
-    c.strokeStyle = DAEYA;
-    c.stroke();
-    c.setLineDash([]);
-    c.font = `500 26px ${MONO}`;
-    const lw = c.measureText("손바닥 자국").width + 28;
-    c.fillStyle = DAEYA;
-    c.fillRect(-lw / 2, -22, lw, 44);
-    c.fillStyle = "#fff";
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    c.fillText("손바닥 자국", 0, 1);
+    c.drawImage(palm, -150, -178, 300, 356);
     c.restore();
   }
 

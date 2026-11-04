@@ -329,12 +329,8 @@ function MomOption({ momKey, checked, onSelect }: { momKey: MomKey; checked: boo
         checked ? "bg-meok text-hanji shadow-hard-red" : "bg-paper text-meok"
       }`}
     >
-      <span
-        aria-hidden="true"
-        className={`grid size-11 flex-none place-items-center rounded-full border-2 bg-placeholder font-mono text-[8px] text-meok-soft ${checked ? "border-hanji" : "border-meok"}`}
-      >
-        MOM
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static svg, next/image adds nothing here */}
+      <img src={m.avatar} alt="" width={44} height={44} className="size-11 flex-none" />
       <span className="min-w-0 flex-1">
         <span className="block text-body-l font-bold">{m.name}</span>
         <span className="mt-0.5 block text-sm leading-[1.4]">&ldquo;{m.sample}&rdquo;</span>
@@ -441,12 +437,14 @@ function Result({ nag, mom, photo, focusRef, cardBtnRef, making, onCard, onAgain
             {/* eslint-disable-next-line @next/next/no-img-element -- local data URL */}
             <img src={photo} alt="올린 방 사진" className="absolute inset-0 size-full object-cover" />
             {showPalm && (
-              <div
-                aria-hidden="true"
-                className="absolute top-4 right-[18px] grid h-[140px] w-[118px] rotate-[-14deg] animate-slam place-items-center rounded-[46%_46%_40%_40%] border-[3px] border-dashed border-daeya bg-daeya/18"
-              >
-                <span className="bg-daeya px-1.5 py-0.5 font-mono text-[10px] font-medium text-white">손바닥 자국</span>
-              </div>
+              // eslint-disable-next-line @next/next/no-img-element -- static svg
+              <img
+                src="/illustrations/palm-mark.svg"
+                alt=""
+                width={118}
+                height={140}
+                className="absolute top-3 right-[18px] h-[140px] w-[118px] rotate-[-14deg] animate-slam"
+              />
             )}
           </div>
           <div className="absolute -bottom-10 left-3 max-w-[calc(100%-24px)] rotate-2 border-2 border-meok bg-daeya px-3.5 pt-2 pb-2.5 text-white shadow-hard-sm">
@@ -457,7 +455,8 @@ function Result({ nag, mom, photo, focusRef, cardBtnRef, making, onCard, onAgain
 
         <div aria-live="polite" className="flex flex-col gap-3">
           <p ref={focusRef as React.RefObject<HTMLParagraphElement>} tabIndex={-1} className="m-0 flex items-center gap-2 text-caption font-bold">
-            <span aria-hidden="true" className="size-[30px] rounded-full border-2 border-meok bg-placeholder" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- static svg */}
+            <img src={MOMS[mom].avatar} alt="" width={30} height={30} className="size-[30px]" />
             {MOMS[mom].name}
           </p>
           {nag.nags.slice(0, Math.min(shown, 3)).map((text, i) => (

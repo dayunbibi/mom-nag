@@ -5,6 +5,7 @@ export type Mom = {
   name: string;
   sample: string; // example line on the picker
   tone: string; // result card background
+  avatar: string; // public/illustrations
   style: string; // goes into the prompt
 };
 
@@ -13,18 +14,21 @@ export const MOMS: Record<MomKey, Mom> = {
     name: "다정한 엄마",
     sample: "밥은 먹고 다니지? 방도 좀 보자.",
     tone: "#f2c4ba",
+    avatar: "/illustrations/mom-sweet.svg",
     style: '부드럽게 돌려 말하지만 할 말은 다 하는 엄마. "~하자", "~했으면 좋겠다", "엄마는 그냥 걱정돼서 그래" 같은 말투.',
   },
   blunt: {
     name: "팩폭 엄마",
     sample: "이게 방이야, 창고야?",
     tone: "#ebc873",
+    avatar: "/illustrations/mom-fact.svg",
     style: '짧고 세게 팩트로 때리는 엄마. "이게 방이니?", "너 이거 언제부터 여기 있었어" 같은 말투.',
   },
   gyeongsang: {
     name: "경상도 엄마",
     sample: "니 이래 살면 안 된데이.",
     tone: "#9cc9c0",
+    avatar: "/illustrations/mom-gyeongsang.svg",
     style: '경상도 사투리를 쓰는 엄마. "뭐꼬", "와 이래 해놨노", "~카이", "~나" 같은 말투.',
   },
 };
