@@ -69,6 +69,15 @@ cp .env.example .env.local   # add GEMINI_API_KEY (free) or ANTHROPIC_API_KEY, o
 npm run dev
 ```
 
+## Things that went wrong (and the fix)
+
+- **Gemini 503 / timeouts** on the first live calls → lite model first, fall back on 500/503/timeout (see above).
+- **A secret ended up in the logs.** During setup the Supabase secret key was pasted into `SUPABASE_URL` by mistake.
+  `fetch` then threw `Failed to parse URL from <that value>/rest/v1/...`, and my error logging printed it.
+  Fixes: rotated the key right away (new key, old one deleted), `db.ts` now validates the config at startup
+  and turns the DB off with a warning that never prints the values, and fetch errors are re-thrown with only
+  the error type. Lesson: treat error messages from code that touches secrets as possibly containing them.
+
 ## Testing
 
 - The SQL was tested against real Postgres running in memory (PGlite): per-person limit, daily cap,
