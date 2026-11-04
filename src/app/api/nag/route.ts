@@ -43,10 +43,14 @@ export async function POST(req: Request) {
     return Response.json(nag);
   } catch (err) {
     console.error(`askMom (${provider}) failed`, err);
-    const busy = err instanceof Error && err.message.endsWith(" 429");
-    return Response.json(
-      { error: busy ? "오늘 엄마가 너무 바빠요. 내일 다시 와주세요." : "엄마가 잠깐 전화 받으러 갔어요. 조금 있다 다시 해주세요." },
-      { status: busy ? 503 : 502 },
-    );
+    const msg = err instanceof Error ? err.message : "";
+    // 429 = free quota used up for today, 500/503 = the AI service is busy right now
+    if (msg.endsWith(" 429")) {
+      return Response.json({ error: "오늘 엄마가 너무 바빠요. 내일 다시 와주세요." }, { status: 503 });
+    }
+    if (msg.endsWith(" 503") || msg.endsWith(" 500")) {
+      return Response.json({ error: "엄마가 지금 통화 중이에요. 1분 뒤에 다시 해주세요." }, { status: 503 });
+    }
+    return Response.json({ error: "엄마가 잠깐 전화 받으러 갔어요. 조금 있다 다시 해주세요." }, { status: 502 });
   }
 }
