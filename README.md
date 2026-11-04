@@ -27,8 +27,20 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
   Now it tries `gemini-3.5-flash-lite` first (fast) and falls back to `gemini-3.8-flash` on 500/503/timeout,
   each with a 12s limit so both fit in the 30s function limit. A 429 (quota) doesn't retry, since another model won't help.
 - **Input checks**: mom type must be one of three, the image must be base64 and under a size cap.
-- **Rate limit** (`src/lib/server/rateLimit.ts`): 5 requests per IP per 10 minutes.
-  It's in memory, so each serverless instance counts separately — moving it to a database is the next step.
+- **Rate limits in Postgres** (`supabase/schema.sql`, `src/lib/server/db.ts`): 5 requests per person per 10 minutes,
+  plus a daily cap for everyone (default 300) so a viral day can't burn through the free AI quota.
+  `try_nag()` checks both limits and inserts the row in **one** call, with an advisory lock per person,
+  so two taps at the same moment can't both sneak under the limit. (The first version kept counts in memory,
+  which doesn't work on serverless: every instance had its own count.)
+- **Privacy in the DB**: the IP is stored only as an HMAC-SHA256 hash keyed with the server secret, so it can't be
+  reversed or matched against a list. Stored per request: hash, mom type, score, which AI. No photos, no nag text.
+  Rows older than 30 days are cleaned up.
+- **Locked-down table**: RLS is on with no policies and grants are revoked from the public roles,
+  so only the server's secret key can read or write. The SQL functions are also only executable by the server.
+- **Graceful fallback**: if Supabase is unreachable, the route falls back to the in-memory limit
+  (`src/lib/server/rateLimit.ts`) and the counter hides itself, instead of the whole app going down.
+- **"오늘 등짝 맞은 사람 n명"** (`/api/stats`): cached at Vercel's edge for 30s so busy traffic doesn't hit the DB
+  on every page view; the page adds your own result right away.
 - **Don't trust model output** (`parseNag` in `src/lib/server/askMom.ts`): pulls the JSON out even if it's wrapped
   in text or code fences, clamps the score to 0–100, keeps at most 3 nags, trims long lines.
 - **Prompt rules**: only talk about objects that are actually visible, never comment on a person's face, body or
@@ -44,6 +56,7 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
 - Next.js 15 (App Router, Route Handler) + TypeScript
 - Tailwind CSS v4
 - Gemini API (`generateContent` with inline image) or Claude API (Messages API with an image block), both with plain `fetch`
+- Supabase (Postgres) through its REST API with plain `fetch` — SQL functions instead of an ORM
 - Canvas 2D for the share card
 
 ## Running locally
@@ -51,10 +64,18 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
 ```bash
 npm install
 cp .env.example .env.local   # add GEMINI_API_KEY (free) or ANTHROPIC_API_KEY, or leave both empty for practice mode
+# optional: create a Supabase project, run supabase/schema.sql in its SQL Editor,
+# then add SUPABASE_URL and SUPABASE_SECRET_KEY
 npm run dev
 ```
 
+## Testing
+
+- The SQL was tested against real Postgres running in memory (PGlite): per-person limit, daily cap,
+  yesterday's rows not counting, stats, and that the public roles can't read the table or call the functions.
+- The full app was tested against a small fake Supabase REST server backed by that same Postgres,
+  including Supabase being down.
+
 ## Next steps
 
-- Move the rate limit and a "today n people got 등짝" counter into Supabase
-- Daily request cap so a viral day can't hit the free-tier limit (or the bill) all at once
+- "이번 주 등짝 랭킹" — most-nagged mom type of the week

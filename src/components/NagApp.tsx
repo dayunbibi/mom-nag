@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MOMS, MOM_KEYS, smashLabel, type MomKey, type Nag } from "@/lib/moms";
 import { shrinkPhoto } from "@/lib/photo";
 import { makeResultImage } from "@/lib/resultImage";
@@ -17,6 +17,22 @@ export default function NagApp() {
   const [state, setState] = useState<State>({ step: "idle" });
   const [card, setCard] = useState<{ url: string; blob: Blob } | null>(null);
   const [making, setMaking] = useState(false);
+  const [stats, setStats] = useState<{ count: number; avg: number } | null>(null);
+
+  // "오늘 등짝 맞은 사람" — hidden if the DB isn't connected
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((s) => {
+        if (typeof s.count === "number") setStats(s);
+      })
+      .catch(() => {});
+  }, []);
+
+  // add our own result right away instead of waiting for the 30s cache
+  function bumpStats(smash: number) {
+    setStats((s) => (s ? { count: s.count + 1, avg: Math.round((s.avg * s.count + smash) / (s.count + 1)) } : s));
+  }
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -44,6 +60,7 @@ export default function NagApp() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "잔소리를 못 받았어요.");
       setState({ step: "result", photo: photo.dataUrl, nag: data as Nag });
+      if (!data.mock) bumpStats(data.smash);
     } catch (err) {
       const message = err instanceof Error && err.message !== "Failed to fetch" ? err.message : "인터넷 연결을 확인하고 다시 해주세요.";
       setState({ step: "error", photo: photo.dataUrl, message });
@@ -71,6 +88,12 @@ export default function NagApp() {
 
   return (
     <div className="flex flex-col gap-6">
+      {stats && stats.count > 0 && (
+        <p className="m-0 self-start rounded-full bg-paper px-3.5 py-1.5 font-ui text-sm tabular-nums">
+          오늘 등짝 맞은 사람 <b className="font-normal text-red">{stats.count}명</b> · 평균 지수 {stats.avg}
+        </p>
+      )}
+
       {/* 1. which mom */}
       <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0" disabled={busy || state.step === "result"}>
         <legend className="mb-2.5 font-ui text-lg">오늘은 어떤 엄마?</legend>
