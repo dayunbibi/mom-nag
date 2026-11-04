@@ -23,6 +23,9 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
 - **Swappable AI provider** (`src/lib/server/ai/`): one shared prompt + parser, and a small file per provider
   (`gemini.ts`, `claude.ts`). `currentProvider()` picks one from env vars, so switching is "change env, redeploy".
   Gemini is the default because it has a free tier; Claude Haiku 5.5 is the paid option.
+- **Busy free models**: in the first live test, the main Gemini model returned 503 "high demand" and then timed out.
+  Now it tries `gemini-3.5-flash-lite` first (fast) and falls back to `gemini-3.8-flash` on 500/503/timeout,
+  each with a 12s limit so both fit in the 30s function limit. A 429 (quota) doesn't retry, since another model won't help.
 - **Input checks**: mom type must be one of three, the image must be base64 and under a size cap.
 - **Rate limit** (`src/lib/server/rateLimit.ts`): 5 requests per IP per 10 minutes.
   It's in memory, so each serverless instance counts separately — moving it to a database is the next step.

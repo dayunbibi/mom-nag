@@ -1,10 +1,13 @@
 import type { MomKey } from "../../moms";
 import { parseNag, systemPrompt, USER_TEXT, type NagResult } from "./prompt";
 
-// Both have a free tier and read images. Free models get "high demand" (503) errors
-// at busy times, so if the first one is busy we fall back to the lighter one.
-// Override the first choice with GEMINI_MODEL.
-const MODELS = [process.env.GEMINI_MODEL || "gemini-3.8-flash", "gemini-3.5-flash-lite"];
+// Both have a free tier and read images. Lite goes first because it answers fast;
+// free models get "high demand" (503) errors or just hang at busy times,
+// so if one is busy or slow we try the other. Override the first choice with GEMINI_MODEL.
+const MODELS = [process.env.GEMINI_MODEL || "gemini-3.5-flash-lite", "gemini-3.8-flash"];
+
+// two tries have to fit inside the route's 30s limit
+const TIMEOUT_MS = 12_000;
 
 type GeminiPart = { text?: string };
 type GeminiResponse = {
@@ -18,8 +21,11 @@ class GeminiError extends Error {
   }
 }
 
-// 500/503 = Google's side is busy, worth trying the next model. 429 = our free quota, don't bother.
-const isBusy = (err: unknown) => err instanceof GeminiError && (err.status === 503 || err.status === 500);
+// 500/503 or no answer in time = Google's side is busy, worth trying the next model.
+// 429 = our free quota, another model won't help.
+const isBusy = (err: unknown) =>
+  (err instanceof GeminiError && (err.status === 503 || err.status === 500)) ||
+  (err instanceof Error && err.name === "TimeoutError");
 
 async function callModel(model: string, imageBase64: string, mom: MomKey, apiKey: string): Promise<NagResult> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
@@ -43,7 +49,7 @@ async function callModel(model: string, imageBase64: string, mom: MomKey, apiKey
         maxOutputTokens: 2048, // newer Flash models may think first, leave room for the answer
       },
     }),
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
 
   if (!res.ok) {
