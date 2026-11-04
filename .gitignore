@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the example env file
 !.env.example
+
+# design reference from the design bot (not app code)
+/design_handoff_mom_nag_1a/

@@ -1,20 +1,138 @@
 @import "tailwindcss";
 
-/* Korean living room floor (장판), fridge-note paper, and mom's red */
+/* 1a "장판 노랑": yellow 장판 floor, 한지 paper, 먹 ink, and mom's red (대야) */
 @theme {
-  --color-floor: #e7c483;
-  --color-floor-line: #d9b06a;
-  --color-paper: #fffaf0;
-  --color-ink: #3b2a1d;
-  --color-ink-dim: #7a6450;
-  --color-line: #c9a165;
-  --color-red: #d6402b;
-  --color-red-dark: #a32c1c;
-  --color-soft: #f6e3b0;
+  --color-jangpan: #ebc873;
+  --color-jangpan-hover: #f6e7be;
+  --color-hanji: #fbf5e6;
+  --color-paper: #fffdf7;
+  --color-meok: #1f1a14;
+  --color-meok-mid: #3f382e;
+  --color-meok-soft: #5b5245;
+  --color-meok-line: #4a4236;
+  --color-meok-muted: #b8ae99;
+  --color-daeya: #d7261e;
+  --color-towel: #2f7d4f;
+  --color-towel-ink: #1f5a37;
+  --color-sigh: #8a5d0b;
+  --color-reserve: #c8541a;
+  --color-card-sweet: #f2c4ba;
+  --color-card-fact: #ebc873;
+  --color-card-gs: #9cc9c0;
 
-  --font-sign: "Black Han Sans", "Jua", system-ui, sans-serif;
-  --font-ui: "Jua", "Gowun Dodum", system-ui, sans-serif;
-  --font-body: "Gowun Dodum", system-ui, sans-serif;
+  /* loaded with a <link> in layout.tsx (next/font only preloads latin) */
+  --font-display: "Gasoek One", "IBM Plex Sans KR", sans-serif;
+  --font-sans: "IBM Plex Sans KR", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --text-display-xl: 4.25rem;
+  --text-display-xl--line-height: 0.98;
+  --text-display-l: 2.5rem;
+  --text-display-l--line-height: 1.08;
+  --text-display-m: 1.875rem;
+  --text-display-m--line-height: 1.15;
+  --text-score: 5.25rem;
+  --text-score--line-height: 0.85;
+  --text-body-l: 1.0625rem;
+  --text-body-l--line-height: 1.5;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.55;
+
+  --spacing-gutter: 1.375rem;
+
+  --radius-ui: 4px;
+  --radius-bubble: 16px;
+
+  --shadow-hard-sm: 3px 3px 0 var(--color-meok);
+  --shadow-hard: 4px 4px 0 var(--color-meok);
+  --shadow-hard-red: 4px 4px 0 var(--color-daeya);
+  --shadow-photo: 6px 6px 0 var(--color-meok);
+
+  --animate-pop: pop 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  --animate-slam: slam 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  --animate-shake: shake 0.45s 1;
+  --animate-scan: scan 1.4s ease-in-out infinite alternate;
+  --animate-slide: slide 1.2s ease-in-out infinite;
+  --animate-blink: blink 1s infinite;
+
+  @keyframes pop {
+    0% {
+      opacity: 0;
+      transform: translateY(12px) scale(0.94);
+    }
+    70% {
+      transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes slam {
+    0% {
+      opacity: 0;
+      transform: rotate(-14deg) scale(2.2);
+    }
+    60% {
+      opacity: 1;
+      transform: rotate(-2deg) scale(0.92);
+    }
+    100% {
+      transform: rotate(-2deg) scale(1);
+    }
+  }
+  @keyframes shake {
+    20% {
+      transform: translate(-4px, 2px);
+    }
+    40% {
+      transform: translate(4px, -2px);
+    }
+    60% {
+      transform: translate(-3px, 1px);
+    }
+    80% {
+      transform: translate(2px, 0);
+    }
+  }
+  @keyframes scan {
+    0% {
+      top: 0;
+    }
+    100% {
+      top: calc(100% - 4px);
+    }
+  }
+  @keyframes slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
+  }
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+@utility bg-jangpan-grid {
+  background-color: var(--color-jangpan);
+  background-image:
+    linear-gradient(rgb(31 26 20 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(31 26 20 / 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* striped "illustration goes here" spot (mom avatars, empty photo) */
+@utility bg-placeholder {
+  background: repeating-linear-gradient(135deg, #e2d7bd 0 5px, #d3c5a6 5px 10px);
 }
 
 /* one light look on purpose (it's mom's living room), so no dark mode */
@@ -22,124 +140,67 @@
   color-scheme: light;
 }
 
-html,
-body {
-  background-color: var(--color-floor);
-  color: var(--color-ink);
-}
-
-body {
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.5;
-  /* 장판 squares */
-  background-image:
-    linear-gradient(var(--color-floor-line) 2px, transparent 2px),
-    linear-gradient(90deg, var(--color-floor-line) 2px, transparent 2px);
-  background-size: 96px 96px;
-}
-
-a:focus-visible {
-  outline: 3px solid var(--color-ink);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-/* mom's chat bubbles pop in one by one */
-.bubble {
-  align-self: flex-start;
-  max-width: 88%;
-  padding: 12px 16px;
-  border-radius: 18px 18px 18px 4px;
-  background: var(--color-paper);
-  font-size: 17px;
-  line-height: 1.45;
-  box-shadow: 0 2px 0 rgba(60, 40, 10, 0.12);
-  animation: pop 0.35s ease-out both;
-}
-.bubble-soft {
-  background: var(--color-soft);
-  color: var(--color-ink-dim);
-}
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
+@layer base {
+  html {
+    background-color: var(--color-jangpan);
   }
-  to {
-    opacity: 1;
-    transform: none;
+  body {
+    @apply bg-jangpan-grid font-sans text-meok antialiased;
   }
-}
-
-/* "엄마가 방 둘러보는 중..." */
-.dots::after {
-  content: "";
-  animation: dots 1.2s steps(4) infinite;
-}
-@keyframes dots {
-  0% {
-    content: "";
+  :focus-visible {
+    outline: 3px solid var(--color-daeya);
+    outline-offset: 3px;
   }
-  25% {
-    content: ".";
+  /* on dark backgrounds the red outline disappears */
+  .on-dark :focus-visible {
+    outline-color: var(--color-jangpan);
   }
-  50% {
-    content: "..";
+  button {
+    cursor: pointer;
   }
-  75% {
-    content: "...";
+  button:disabled {
+    cursor: default;
   }
 }
 
 @layer components {
-  .btn {
-    display: inline-block;
-    font-family: var(--font-ui);
-    font-size: 17px;
-    text-align: center;
-    color: var(--color-paper);
-    background: var(--color-red);
-    border-radius: 12px;
-    padding: 12px 18px;
-    cursor: pointer;
-    box-shadow: 0 4px 0 var(--color-red-dark);
-    transition:
-      transform 0.08s,
-      box-shadow 0.08s;
+  /* main button: 먹 with a red shadow that "presses" in */
+  .btn-main {
+    @apply flex h-14 w-full items-center justify-center rounded-ui border-2 border-meok bg-meok font-display text-xl text-jangpan shadow-hard-red transition-[transform,box-shadow] duration-100;
   }
-  .btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 var(--color-red-dark);
+  .btn-main:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--color-daeya);
   }
-  .btn:focus-visible {
-    outline: 3px solid var(--color-ink);
-    outline-offset: 3px;
+  .btn-red {
+    @apply flex h-14 w-full items-center justify-center rounded-ui border-2 border-meok bg-daeya font-display text-xl text-white shadow-hard transition-[transform,box-shadow] duration-100;
   }
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: default;
+  .btn-red:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--color-meok);
   }
-  .btn-big {
-    font-size: 21px;
-    padding: 16px;
+  .btn-red:focus-visible {
+    outline-color: var(--color-meok);
+    outline-offset: 4px;
   }
-  .btn-ghost {
-    color: var(--color-ink);
-    background: var(--color-paper);
-    box-shadow: 0 4px 0 var(--color-line);
+  .btn-sub {
+    @apply flex h-13 w-full items-center justify-center rounded-ui border-2 border-meok bg-hanji text-base font-bold hover:bg-jangpan-hover;
+  }
+  .bubble {
+    @apply m-0 max-w-[88%] rounded-[16px_16px_16px_4px] border-2 border-meok bg-paper px-[15px] py-[11px] text-base leading-normal font-medium text-pretty;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bubble {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  .btn {
-    transition: none;
-  }
-  .dots::after {
-    animation: none;
-    content: "...";
+  /* looping things just stop instead of jumping to the end */
+  .motion-loop {
+    animation: none !important;
   }
 }

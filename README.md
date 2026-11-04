@@ -59,6 +59,22 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
 - Supabase (Postgres) through its REST API with plain `fetch` — SQL functions instead of an ORM
 - Canvas 2D for the share card
 
+## Design
+
+The UI follows a design handoff ("1a 장판 노랑": yellow 장판 floor, 한지 paper, 먹 ink, one red).
+The tokens live in `src/app/globals.css` as a Tailwind v4 `@theme`, so components only use names like
+`bg-jangpan-grid`, `text-daeya`, `shadow-hard`.
+
+- Fonts: Gasoek One (display), IBM Plex Sans KR (body), IBM Plex Mono (labels), loaded with a `<link>`
+  because `next/font` only preloads the latin subset and the canvas card needs the Korean ones.
+- The result is revealed step by step: three nags with a typing bubble in between, the praise,
+  then the score counts up and the stage stamp lands. Higher stages shake the score and vibrate the phone.
+  `prefers-reduced-motion` shortens the gaps and turns the shake, stamp and scan line off.
+- The mom picker is a real radio group (arrow keys work), the card preview is a modal that traps focus
+  and closes on Esc, and each new screen moves focus to its heading.
+- The 1080×1920 card is drawn with Canvas 2D in the same layout as the design. If mom talks a lot,
+  the bubble text shrinks until it fits above the score.
+
 ## Running locally
 
 ```bash
