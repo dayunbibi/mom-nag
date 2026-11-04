@@ -24,8 +24,10 @@ phone photo ──► browser shrinks it to 1024px JPEG ──► POST /api/nag 
   (`gemini.ts`, `claude.ts`). `currentProvider()` picks one from env vars, so switching is "change env, redeploy".
   Gemini is the default because it has a free tier; Claude Haiku 5.5 is the paid option.
 - **Busy free models**: in the first live test, the main Gemini model returned 503 "high demand" and then timed out.
-  Now it tries `gemini-3.5-flash-lite` first (fast) and falls back to `gemini-3.8-flash` on 500/503/timeout,
-  each with a 12s limit so both fit in the 30s function limit. A 429 (quota) doesn't retry, since another model won't help.
+  Now it tries `gemini-3.5-flash-lite` first (fast), retries it once after 1.5s (busy spikes are short),
+  then falls back to `gemini-3.8-flash` and `gemini-3.6-flash` on 500/503/timeout. Each try gets at most 12s and
+  the whole chain stops after 26s, so it always fits in the 30s function limit. A 429 (quota) doesn't retry,
+  since another model won't help, and a 404 (model renamed) is skipped.
 - **Input checks**: mom type must be one of three, the image must be base64 and under a size cap.
 - **Rate limits in Postgres** (`supabase/schema.sql`, `src/lib/server/db.ts`): 5 requests per person per 10 minutes,
   plus a daily cap for everyone (default 300) so a viral day can't burn through the free AI quota.
@@ -88,6 +90,7 @@ npm run dev
 ## Things that went wrong (and the fix)
 
 - **Gemini 503 / timeouts** on the first live calls → lite model first, fall back on 500/503/timeout (see above).
+  It happened again during a busy hour with both models down, so the chain got a retry and a third model.
 - **A secret ended up in the logs.** During setup the Supabase secret key was pasted into `SUPABASE_URL` by mistake.
   `fetch` then threw `Failed to parse URL from <that value>/rest/v1/...`, and my error logging printed it.
   Fixes: rotated the key right away (new key, old one deleted), `db.ts` now validates the config at startup
