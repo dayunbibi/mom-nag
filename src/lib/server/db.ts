@@ -3,13 +3,23 @@
 import { createHmac } from "node:crypto";
 import type { MomKey } from "../moms";
 
-const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SECRET_KEY; // sb_secret_..., server only
+const URL = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
+const KEY = process.env.SUPABASE_SECRET_KEY?.trim(); // sb_secret_..., server only
 
 const DAILY_CAP = Number(process.env.NAG_DAILY_CAP) || 300;
 
+// Only turn the DB on when both values look right. A key pasted into the URL field
+// (it happened) would otherwise end up inside error messages and logs.
+const urlOk = !!URL && /^https:\/\/[^\s/]+$/.test(URL) && (!KEY || !URL.includes(KEY));
+const configured = urlOk && !!KEY;
+
+if ((URL || KEY) && !configured) {
+  // never print the values themselves
+  console.warn("Supabase is off: SUPABASE_URL must look like https://xxxx.supabase.co and SUPABASE_SECRET_KEY must be set");
+}
+
 export function dbEnabled() {
-  return !!(URL && KEY);
+  return configured;
 }
 
 // We never store the raw IP. HMAC with our secret means nobody can reverse it
@@ -19,16 +29,23 @@ export function hashIp(ip: string) {
 }
 
 async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
-  const res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
-    method: "POST",
-    // new Supabase keys go in the apikey header only (not Authorization)
-    headers: { apikey: KEY!, "content-type": "application/json" },
-    body: JSON.stringify(args),
-    signal: AbortSignal.timeout(5_000),
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      // new Supabase keys go in the apikey header only (not Authorization)
+      headers: { apikey: KEY!, "content-type": "application/json" },
+      body: JSON.stringify(args),
+      signal: AbortSignal.timeout(5_000),
+      cache: "no-store",
+    });
+  } catch (err) {
+    // fetch errors can include the full URL/request, so only keep the error type
+    throw new Error(`Supabase ${fn} request failed (${err instanceof Error ? err.name : "unknown"})`);
+  }
   if (!res.ok) {
-    throw new Error(`Supabase ${fn} ${res.status}: ${await res.text()}`);
+    // PostgREST error bodies describe the SQL problem, they don't echo the key
+    throw new Error(`Supabase ${fn} ${res.status}: ${(await res.text()).slice(0, 300)}`);
   }
   const text = await res.text();
   return (text ? JSON.parse(text) : null) as T;
