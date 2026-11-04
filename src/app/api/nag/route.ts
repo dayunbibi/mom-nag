@@ -1,5 +1,5 @@
 import { isMomKey, type Nag } from "@/lib/moms";
-import { askMom } from "@/lib/server/askMom";
+import { askMom, currentProvider } from "@/lib/server/ai";
 import { mockNag } from "@/lib/server/mock";
 import { allowRequest } from "@/lib/server/rateLimit";
 
@@ -30,18 +30,23 @@ export async function POST(req: Request) {
     return Response.json({ error: "사진을 읽지 못했어요. 다른 사진으로 해주세요." }, { status: 400 });
   }
 
+  const provider = currentProvider();
+
   // no key yet -> example answer, the page shows a "practice mode" note
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  if (provider === "mock") {
     const nag: Nag = mockNag(mom);
     return Response.json(nag);
   }
 
   try {
-    const nag: Nag = { ...(await askMom(image, mom, apiKey)), mock: false };
+    const nag: Nag = { ...(await askMom(provider, image, mom)), mock: false };
     return Response.json(nag);
   } catch (err) {
-    console.error("askMom failed", err);
-    return Response.json({ error: "엄마가 잠깐 전화 받으러 갔어요. 조금 있다 다시 해주세요." }, { status: 502 });
+    console.error(`askMom (${provider}) failed`, err);
+    const busy = err instanceof Error && err.message.endsWith(" 429");
+    return Response.json(
+      { error: busy ? "오늘 엄마가 너무 바빠요. 내일 다시 와주세요." : "엄마가 잠깐 전화 받으러 갔어요. 조금 있다 다시 해주세요." },
+      { status: busy ? 503 : 502 },
+    );
   }
 }
