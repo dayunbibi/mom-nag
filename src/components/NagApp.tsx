@@ -12,7 +12,24 @@ type State =
   | { step: "idle" }
   | { step: "loading"; photo: Photo }
   | { step: "result"; photo: Photo; nag: Nag }
-  | { step: "error"; photo: Photo | null; message: string };
+  | { step: "error"; photo: Photo | null; message: string; kind: ErrorKind };
+
+// one error screen per reason, so a rate limit doesn't say "mom is on the phone"
+type ErrorKind = "busy" | "rest" | "closed" | "photo" | "away" | "net";
+const ERRORS: Record<ErrorKind, { stamp: string; title: [string, string]; retry: boolean }> = {
+  busy: { stamp: "통화 중", title: ["엄마가 지금", "통화 중이에요."], retry: true },
+  rest: { stamp: "휴식 중", title: ["엄마도", "좀 쉬자."], retry: false },
+  closed: { stamp: "영업 끝", title: ["오늘은", "문 닫았어요."], retry: false },
+  photo: { stamp: "사진 오류", title: ["사진이", "안 보여요."], retry: false },
+  away: { stamp: "자리 비움", title: ["엄마가 잠깐", "자리 비웠어요."], retry: true },
+  net: { stamp: "연결 끊김", title: ["인터넷이", "끊겼어요."], retry: true },
+};
+
+class NagError extends Error {
+  constructor(message: string, public kind: ErrorKind) {
+    super(message);
+  }
+}
 
 type Props = { privacy: string; practice: boolean };
 
@@ -83,13 +100,13 @@ export default function NagApp({ privacy, practice }: Props) {
       });
       const data = await res.json();
       if (id !== requestId.current) return;
-      if (!res.ok) throw new Error(data.error || "잔소리를 못 받았어요.");
+      if (!res.ok) throw new NagError(data.error || "잔소리를 못 받았어요.", data.kind in ERRORS ? data.kind : "away");
       setState({ step: "result", photo, nag: data as Nag });
       if (!data.mock) bumpStats(data.smash);
     } catch (err) {
       if (id !== requestId.current) return;
-      const message = err instanceof Error && err.message !== "Failed to fetch" ? err.message : "인터넷 연결을 확인하고 다시 해주세요.";
-      setState({ step: "error", photo, message });
+      if (err instanceof NagError) setState({ step: "error", photo, message: err.message, kind: err.kind });
+      else setState({ step: "error", photo, message: "인터넷 연결을 확인하고 다시 해주세요.", kind: "net" });
     }
   }
 
@@ -99,7 +116,7 @@ export default function NagApp({ privacy, practice }: Props) {
     try {
       photo = await shrinkPhoto(file);
     } catch {
-      setState({ step: "error", photo: null, message: "이 사진은 못 읽었어요. JPG나 PNG 사진으로 해주세요." });
+      setState({ step: "error", photo: null, message: "이 사진은 못 읽었어요. JPG나 PNG 사진으로 해주세요.", kind: "photo" });
       return;
     }
     ask(photo);
@@ -250,17 +267,19 @@ export default function NagApp({ privacy, practice }: Props) {
 
       {state.step === "error" && (
         <section role="alert" className="px-gutter pt-9 pb-10">
-          <div className="inline-block rotate-[-4deg] border-[3px] border-daeya px-3 pt-1 pb-1.5 font-display text-lg text-daeya">통화 중</div>
-          <h2 ref={focusRef as React.RefObject<HTMLHeadingElement>} tabIndex={-1} className="m-0 mt-[18px] font-display text-display-l font-normal">
-            엄마가 지금
+          <div className="inline-block rotate-[-4deg] border-[3px] border-daeya px-3 pt-1 pb-1.5 font-display text-lg text-daeya">
+            {ERRORS[state.kind].stamp}
+          </div>
+          <h2 ref={focusRef as React.RefObject<HTMLHeadingElement>} tabIndex={-1} className="m-0 mt-[18px] font-display text-display-l font-normal outline-none">
+            {ERRORS[state.kind].title[0]}
             <br />
-            통화 중이에요.
+            {ERRORS[state.kind].title[1]}
           </h2>
           <p className="m-0 mt-3.5 text-base leading-[1.55] text-pretty text-meok-mid">
             {/* the busy message starts with the same sentence as the title */}
             {state.message.replace(/^엄마가 지금 통화 중이에요\.\s*/, "")}
           </p>
-          {state.photo && (
+          {state.photo && ERRORS[state.kind].retry && (
             <div className="mt-[22px] flex items-center gap-3 border-y-2 border-meok py-3">
               {/* eslint-disable-next-line @next/next/no-img-element -- local data URL */}
               <img src={state.photo.dataUrl} alt="" className="size-14 flex-none border-2 border-meok object-cover" />
@@ -268,7 +287,7 @@ export default function NagApp({ privacy, practice }: Props) {
             </div>
           )}
           <div className="mt-6 flex flex-col gap-3">
-            {state.photo && (
+            {state.photo && ERRORS[state.kind].retry && (
               <button type="button" className="btn-red" onClick={() => ask(state.photo!)}>
                 다시 해보기
               </button>
