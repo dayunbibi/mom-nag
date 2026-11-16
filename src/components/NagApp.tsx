@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { MOMS, MOM_KEYS, STAGES, STAGE_CUTS, stageIndex, type MomKey, type Nag } from "@/lib/moms";
 import { shrinkPhoto } from "@/lib/photo";
@@ -189,6 +190,7 @@ export default function NagApp({ privacy, practice }: Props) {
             </p>
           </header>
 
+          <div className="nag-hero-art"><Image src="/illustrations/mom-nag.webp" alt="어질러진 방에서 포잎이에게 잔소리하는 엄마 고양이" width={1200} height={675} priority /></div>
           <section className="px-gutter pt-7 pb-1">
             <SectionTitle n="01" id="pick-title">
               누가 잔소리할까요?

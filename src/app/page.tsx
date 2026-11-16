@@ -17,7 +17,8 @@ export default function Home() {
   const provider = currentProvider();
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-[430px] flex-col border-x-2 border-meok bg-hanji">
+    <main className="poipi-nag mx-auto flex min-h-dvh flex-col bg-hanji">
+      <nav className="poipi-nav" aria-label="포잎이 놀이터"><a href="https://homesick-games.vercel.app">🍀 포잎이 놀이터</a><span>A LITTLE EVERYDAY FUN</span></nav>
       <NagApp privacy={PRIVACY[provider]} practice={provider === "mock"} />
 
       <footer className="on-dark mt-auto bg-meok px-gutter pt-7 pb-[34px] text-caption leading-[1.6] text-[#e9e1cf]">
@@ -30,12 +31,12 @@ export default function Home() {
           </>
         )}
         <div className={`flex flex-col gap-2 ${dbEnabled() ? "mt-[22px] border-t border-meok-line pt-4" : ""}`}>
-          <span className="text-xs text-meok-muted">겨울 간식 게임도 있어요</span>
+          <span className="text-xs text-meok-muted">포잎이의 다른 놀이도 만나봐요</span>
           <a
             href="https://homesick-games.vercel.app"
             className="self-start py-1 font-bold text-hanji underline underline-offset-[3px] hover:text-jangpan"
           >
-            향수병 게임즈 ↗
+            포잎이 놀이터로 돌아가기 ↗
           </a>
         </div>
         <p className="m-0 mt-5 font-mono text-[11px] text-meok-muted">{host}</p>

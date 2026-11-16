@@ -2,30 +2,30 @@
 
 /* 1a "장판 노랑": yellow 장판 floor, 한지 paper, 먹 ink, and mom's red (대야) */
 @theme {
-  --color-jangpan: #ebc873;
-  --color-jangpan-hover: #f6e7be;
-  --color-hanji: #fbf5e6;
+  --color-jangpan: #dbe9b7;
+  --color-jangpan-hover: #edf2df;
+  --color-hanji: #fffcf5;
   --color-paper: #fffdf7;
-  --color-meok: #1f1a14;
-  --color-meok-mid: #3f382e;
-  --color-meok-soft: #5b5245;
-  --color-meok-line: #4a4236;
-  --color-meok-muted: #b8ae99;
-  --color-daeya: #d7261e;
+  --color-meok: #414336;
+  --color-meok-mid: #60644f;
+  --color-meok-soft: #747864;
+  --color-meok-line: #dce2cd;
+  --color-meok-muted: #9b9e8c;
+  --color-daeya: #718e4e;
   --color-towel: #2f7d4f;
   --color-towel-ink: #1f5a37;
   --color-sigh: #8a5d0b;
   --color-reserve: #c8541a;
   --color-card-sweet: #f2c4ba;
-  --color-card-fact: #ebc873;
+  --color-card-fact: #dbe9b7;
   --color-card-gs: #9cc9c0;
 
   /* loaded with a <link> in layout.tsx (next/font only preloads latin) */
-  --font-display: "Gasoek One", "IBM Plex Sans KR", sans-serif;
+  --font-display: "Jua", "IBM Plex Sans KR", sans-serif;
   --font-sans: "IBM Plex Sans KR", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --text-display-xl: 4.25rem;
+  --text-display-xl: 3.5rem;
   --text-display-xl--line-height: 0.98;
   --text-display-l: 2.5rem;
   --text-display-l--line-height: 1.08;
@@ -40,13 +40,13 @@
 
   --spacing-gutter: 1.375rem;
 
-  --radius-ui: 4px;
+  --radius-ui: 16px;
   --radius-bubble: 16px;
 
-  --shadow-hard-sm: 3px 3px 0 var(--color-meok);
-  --shadow-hard: 4px 4px 0 var(--color-meok);
-  --shadow-hard-red: 4px 4px 0 var(--color-daeya);
-  --shadow-photo: 6px 6px 0 var(--color-meok);
+  --shadow-hard-sm: 0 3px 0 #cbd8ae;
+  --shadow-hard: 0 5px 14px #62714312;
+  --shadow-hard-red: 0 4px 0 #b9cc92;
+  --shadow-photo: 0 6px 20px #62714318;
 
   --animate-pop: pop 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   --animate-slam: slam 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both;
@@ -204,3 +204,31 @@
     animation: none !important;
   }
 }
+
+/* Shared Poipi Playground identity */
+html,body{background:#fffcf5;background-image:none}
+.poipi-nag{border:1px solid #e3e6d8;border-radius:26px;overflow:hidden;margin:28px auto;box-shadow:0 12px 50px #59633808;max-width:520px}
+.poipi-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 22px;background:#fffcf5;border-bottom:1px solid #e6e8db;font-size:12px;color:#758454;font-weight:700}
+.poipi-nav a{padding:5px 0;text-decoration:none}.poipi-nav a:hover{color:#49662f}.poipi-nav span{font-size:9px;letter-spacing:1.4px;color:#9aa48b}
+.poipi-nag header.bg-jangpan-grid{background:#edf2df;background-image:radial-gradient(#cbd9ac 1px,transparent 1px);background-size:20px 20px;border-color:#d6dfc5;padding-top:28px;padding-bottom:25px}
+.poipi-nag header h1{line-height:1.15;letter-spacing:-1.5px}
+.poipi-nag header h1 br{display:none}.poipi-nag header h1 span{display:block}
+.poipi-nag header>p:first-child{font-family:inherit;color:#899475;font-size:10px;line-height:1.8}
+.poipi-nag header>p:last-child{font-size:11px;line-height:1.9;color:#7f886e}
+.poipi-nag [role=radio]{border-width:1px;border-color:#dce2cf;padding:15px;background:#fffef9;box-shadow:none}
+.poipi-nag [role=radio][aria-checked=true]{background:#edf3df;color:#4c6237;border:2px solid #97ad70;padding:14px;box-shadow:0 3px 0 #dce7c7}
+.poipi-nag [role=radio] img{border-radius:50%;background:#edf1df}
+.poipi-nag [role=radio] span.border-hanji{border-color:#859b60}
+.poipi-nag [role=radio] .bg-jangpan{background:#819b54}
+.poipi-nag button.border-dashed{border-color:#bccba3;border-width:2px;background:#f7f9ef;border-radius:22px}
+.poipi-nag button.border-dashed:hover{background:#edf2df}
+.poipi-nag .bubble{border-width:1px;border-color:#d7dfc6;border-radius:18px 18px 18px 5px;box-shadow:0 2px 0 #edf0e5}
+.poipi-nag .btn-main,.poipi-nag .btn-red{border:1px solid #82965e;background:#839b60;color:#fffdf6;box-shadow:0 4px 0 #697f49;border-radius:14px;font-family:Jua,sans-serif}
+.poipi-nag .btn-sub{border:1px solid #d8dfca;background:#f4f6eb;color:#65784b;border-radius:14px}
+.poipi-nag footer{background:#edf2df;color:#747e63;border-top:1px solid #dce3cd}
+.poipi-nag footer .text-meok-muted{color:#8e977f}.poipi-nag footer a{color:#5b7540}
+.poipi-nag .shadow-hard-sm{box-shadow:0 3px 0 #b5c791;border-color:#7d9659;border-width:1px;border-radius:13px}
+.poipi-nag .on-dark[role=status]{background:#e7edd9;color:#68774f}.poipi-nag .on-dark[role=status] span{color:inherit}
+@media(max-width:560px){.poipi-nag{margin:0;border:0;border-radius:0;box-shadow:none;max-width:100%}.poipi-nav{padding:12px 20px}}
+
+.nag-hero-art{padding:20px 22px 0}.nag-hero-art img{display:block;width:100%;height:auto;border-radius:20px;border:1px solid #e8dfd5}
